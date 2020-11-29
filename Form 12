@@ -1,0 +1,204 @@
+include:
+  - docassemble.MAVirtualCourt:basic-questions.yml
+---
+comment: |
+  The metadata section controls the tab title and saved interview title. You can delete this section if you include this YAML file in another YAML file.
+metadata:
+  title: |
+    Tenant Rent Withholding Letter
+  short title: |
+    Rent Withholding Letter
+---
+comment: |
+  This section is used by MAVirtualCourts to control how some of the questions work.
+mandatory: True
+code: |
+  interview_metadata # make sure we initialize the object
+  if not defined("interview_metadata['Rent_Withholding_Letter']"):
+    interview_metadata.initializeObject('Rent_Withholding_Letter')
+  interview_metadata['Rent_Withholding_Letter'].update({
+    'title': 'Tenant Rent Withholding Letter',
+    'short title': 'Rent Withholding Letter',
+    'description': 'This letter is created to...',
+    'original_form': 'https://www.masslegalhelp.org/housing/lt1-form-12-rent-w-holding.pdf',
+    'allowed courts': [
+      'Boston Municipal Court',
+      'District Court',
+      'Housing Court',
+      'Superior Court',
+    ],
+    'categories': [
+      'Housing',
+    ],
+    'logic block variable': 'Rent_Withholding_Letter',
+    'attachment block variable': 'Rent_Withholding_Letter_attachment',
+    'typical role': 'plaintiff',
+  })
+---
+features:
+  navigation: True
+---
+sections:
+  - review_Rent_Withholding_Letter: Review your answers
+---
+id: interview_order_Rent_Withholding_Letter
+code: |
+  # This is a placeholder to control logic flow in this interview
+
+  basic_questions_intro_screen 
+  Rent_Withholding_Letter_intro
+  # Set the allowed courts for this interview
+  allowed_courts = interview_metadata["Rent_Withholding_Letter"]["allowed courts"]
+  nav.set_section('review_Rent_Withholding_Letter')
+  user_role = 'plaintiff'
+  condition
+  Service_method
+  repairs_request_date
+  set_progress(12.5)
+  delivery_date
+  # Set the answer file name.
+  set_parts(subtitle=str(users))
+  users[0].address.address
+  set_progress(25.0)
+  other_parties[0]
+  users[0]
+  set_progress(37.5)
+  str(other_parties)
+  other_parties[0].address.address
+  # Save (anonymized) interview statistics.
+  store_variables_snapshot(data={'zip': users[0].address.zip})
+  Rent_Withholding_Letter_preview_question # Pre-canned preview screen
+  basic_questions_signature_flow
+  users[0].signature
+  Rent_Withholding_Letter = True
+---
+comment: |
+  This question is used to introduce your interview. Please customize
+id: Tenant Rent Withholding Letter
+continue button field: Rent_Withholding_Letter_intro
+question: |
+  Tenant Rent Withholding Letter
+subquestion: |
+  This letter is created to...
+---
+id: Review your form before you sign it
+continue button field: Rent_Withholding_Letter_preview_question
+question: |
+  Review your form before you sign it
+subquestion: |
+  Here is a preview of the form you'll sign on the next page. 
+  
+   ${ pdf_concatenate(Rent_Withholding_Letter_attachment['preview'], filename='Rent_Withholding_Letter.pdf')}
+---
+id: Issue s Description
+question: |
+  Issue(s) Description:
+subquestion: |
+  Describe the issue(s) you are experiencing with your rented property.
+fields:
+  - 'Condition': condition
+    input type: area
+  - 'Conditions': conditions
+    input type: area
+---
+id: Service Method of Letter
+question: |
+  Service Method of Letter
+subquestion: |
+  How did you send your repair letter to your landlord?
+fields:
+  - 'Service Method Used to Send Letter': Service_method
+---
+id: Repair Request Date
+question: |
+  Repair Request Date
+subquestion: |
+  On approximately what day did you send your repair request letter to your landlord?
+fields:
+  - 'Notification Date for Repairs Requested': repairs_request_date
+    datatype: date
+---
+id: Repair Letter Delivery Date
+question: |
+  Repair Letter Delivery Date
+subquestion: |
+  What day did you deliver your repair request letter?
+fields:
+  - 'Repair Letter Delivery Date': delivery_date
+    datatype: date
+---
+progress: 100
+mandatory: True
+id: Your form is ready to download and file
+question: |
+  Your form is ready to download and file
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+  
+  Below is a preview of your form.
+  
+  ${pdf_concatenate(Rent_Withholding_Letter_attachment['final'], filename='Rent_Withholding_Letter.pdf') }
+need: Rent_Withholding_Letter
+attachment code: Rent_Withholding_Letter_attachment['final']
+---
+objects:
+  - Rent_Withholding_Letter_attachment: DADict
+---
+attachment:
+    variable name: Rent_Withholding_Letter_attachment[i]
+    name: Rent Withholding Letter
+    filename: Rent_Withholding_Letter
+    docx template file: Form_12_-_Fielddox.docx
+---
+id: Rent_Withholding_Letter review screen
+event: review_Rent_Withholding_Letter
+question: |
+  Placeholder Review Screen
+subquestion: |
+  Edit your answers below
+review: 
+  - Edit: Service_method
+    button: |
+      Service Method Used to Send Letter:
+      ${ Service_method }
+  - Edit: condition
+    button: |
+      Condition:
+      > ${ single_paragraph(condition) }
+  - Edit: conditions
+    button: |
+      Conditions:
+      > ${ single_paragraph(conditions) }
+  - Edit: repairs_request_date
+    button: |
+      Notification Date for Repairs Requested:
+      ${ repairs_request_date.format() }
+  - Edit: delivery_date
+    button: |
+      Repair Letter Delivery Date:
+      ${ delivery_date.format() }
+  - Edit: users[0].address.address
+    button: |
+      users[0].address.address:
+      ${ users[0].address.address }
+  - Edit: users[0].signature
+    button: |
+      users[0].signature:
+      ${ users[0].signature }
+  - Edit: other_parties[0].name.first
+    button: |
+      other_parties[0]:
+      ${ other_parties[0] }
+  - Edit: users[0].name.first
+    button: |
+      users[0]:
+      ${ users[0] }
+  - Edit: other_parties[0].name.first
+    button: |
+      other_parties:
+      ${ other_parties }
+  - Edit: other_parties[0].address.address
+    button: |
+      other_parties[0].address.address:
+      ${ other_parties[0].address.address }
+
